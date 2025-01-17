@@ -50,6 +50,7 @@ sysData = {'M0' : {
    'Heat' : {'default': 0.0, 'target' : 0.0, 'max': 1.0, 'min' : 0.0,'ON' : 0,'record' : []},
    'Thermostat' : {'default': 37.0, 'target' : 0.0, 'max': 50.0, 'min' : 0.0,'ON' : 0,'record' : [],'cycleTime' : 30.0, 'Integral' : 0.0,'last' : -1},
    'Experiment' : {'indicator' : 'USR0', 'startTime' : 'Waiting', 'startTimeRaw' : 0, 'ON' : 0,'cycles' : 0, 'cycleTime' : 60.0,'threadCount' : 0},
+   'Inoculation' : {'startTime': 'Waiting', 'ON': 0},
    'Terminal' : {'text' : ''},
    'AS7341' : {
         'spectrum' : {'nm410' : 0, 'nm440' : 0, 'nm470' : 0, 'nm510' : 0, 'nm550' : 0, 'nm583' : 0, 'nm620' : 0, 'nm670' : 0,'CLEAR' : 0, 'NIR' : 0,'DARK' : 0,'ExtGPIO' : 0, 'ExtINT' : 0, 'FLICKER' : 0},
@@ -81,7 +82,8 @@ sysData = {'M0' : {
                 'LEDE' : {'nm410' : 0, 'nm440' : 0, 'nm470' : 0, 'nm510' : 0, 'nm550' : 0, 'nm583' : 0, 'nm620' : 0, 'nm670' : 0,'CLEAR' : 0,'NIR' : 0},
                 'LEDF' : {'nm410' : 0, 'nm440' : 0, 'nm470' : 0, 'nm510' : 0, 'nm550' : 0, 'nm583' : 0, 'nm620' : 0, 'nm670' : 0,'CLEAR' : 0,'NIR' : 0},
                 'LEDG' : {'nm410' : 0, 'nm440' : 0, 'nm470' : 0, 'nm510' : 0, 'nm550' : 0, 'nm583' : 0, 'nm620' : 0, 'nm670' : 0,'CLEAR' : 0,'NIR' : 0},
-                'LASER650' : {'nm410' : 0, 'nm440' : 0, 'nm470' : 0, 'nm510' : 0, 'nm550' : 0, 'nm583' : 0, 'nm620' : 0, 'nm670' : 0,'CLEAR' : 0,'NIR' : 0}}
+                'LASER650' : {'nm410' : 0, 'nm440' : 0, 'nm470' : 0, 'nm510' : 0, 'nm550' : 0, 'nm583' : 0, 'nm620' : 0, 'nm670' : 0,'CLEAR' : 0,'NIR' : 0}},
+   'samples' : {'current_label': "", 'current_number': 1 ,'label_history': {}, 'record': []},
    }}
 
 
@@ -1818,24 +1820,25 @@ def csvData(M):
                   'LED_6500K_setpoint', 'LED_600_setpoint', 'LED_550_setpoint', 'LED_white_setpoint',
                   'laser_setpoint','LED_UV_int','FP1_base','FP1_emit1','FP1_emit2','FP2_base',
                   'FP2_emit1','FP2_emit2','FP3_base','FP3_emit1','FP3_emit2','custom_prog_param1','custom_prog_param2',
-                  'custom_prog_param3','custom_prog_status','zigzag_target','growth_rate']
-
-    row=[sysData[M]['time']['record'][-1],
-        sysData[M]['OD']['record'][-1],
-        sysData[M]['OD']['targetrecord'][-1],
-        sysData[M]['OD0']['target'],
-        sysData[M]['Thermostat']['record'][-1],
-        sysData[M]['Heat']['target']*float(sysData[M]['Heat']['ON']),
-        sysData[M]['ThermometerInternal']['record'][-1],
-        sysData[M]['ThermometerExternal']['record'][-1],
-        sysData[M]['ThermometerIR']['record'][-1],
-        sysData[M]['Light']['record'][-1],
-        sysData[M]['Pump1']['record'][-1],
-        sysData[M]['Pump2']['record'][-1],
-        sysData[M]['Pump3']['record'][-1],
-        sysData[M]['Pump4']['record'][-1],
-        sysData[M]['Volume']['target'],
-        sysData[M]['Stir']['target']*sysData[M]['Stir']['ON'],]
+                  'custom_prog_param3','custom_prog_status','zigzag_target','growth_rate','sample_name',
+                  'sample_number','sample_volume', 'innoculated']
+    
+    row=[sysData[M]['time']['record'][-1], #exp_time
+        sysData[M]['OD']['record'][-1], #od_measured
+        sysData[M]['OD']['targetrecord'][-1], #od_setpoint
+        sysData[M]['OD0']['target'], #od_zero_setpoint
+        sysData[M]['Thermostat']['record'][-1], #thermostat_setpoint
+        sysData[M]['Heat']['target']*float(sysData[M]['Heat']['ON']), #heating_rate
+        sysData[M]['ThermometerInternal']['record'][-1], #internal_air_temp
+        sysData[M]['ThermometerExternal']['record'][-1], #external_air_temp
+        sysData[M]['ThermometerIR']['record'][-1], #media_temp
+        sysData[M]['Light']['record'][-1], #opt_gen_act_int
+        sysData[M]['Pump1']['record'][-1], #pump_1_rate
+        sysData[M]['Pump2']['record'][-1], #pump_2_rate
+        sysData[M]['Pump3']['record'][-1], #pump_3_rate
+        sysData[M]['Pump4']['record'][-1], #pump_4_rate
+        sysData[M]['Volume']['target'], #media_vol
+        sysData[M]['Stir']['target']*sysData[M]['Stir']['ON'],] #stirring_rate
     for LED in ['LEDA','LEDB','LEDC','LEDD','LEDE','LEDF','LEDG','LEDH','LEDI','LEDV','LASER650']:
         row=row+[sysData[M][LED]['target']]
     row=row+[sysData[M]['UV']['target']*sysData[M]['UV']['ON']]
@@ -1854,7 +1857,22 @@ def csvData(M):
     row=row+[sysData[M]['Zigzag']['target']*float(sysData[M]['Zigzag']['ON'])]
     row=row+[sysData[M]['GrowthRate']['current']*sysData[M]['Zigzag']['ON']]
     
-   
+    sample_names = []
+    sample_number = []
+    sample_volume = []
+    
+    for sample in reversed(sysData[M]['samples']['record']):
+        if 0 < sysData[M]['time']['record'][-1] - sample[0] < 60:
+            sample_names.append(sample[1])
+            sample_number.append(sample[2])
+            sample_volume.append(sample[3])
+        else:
+            break
+        
+    row=row+[','.join(sample_names)]
+    row=row+[',' .join(sample_number)]
+    row=row+[','.join(sample_volume)]
+    row=row+[sysData[M]['Inoculation']['ON']]    
 	#Following can be uncommented if you are recording ALL spectra for e.g. biofilm experiments
     #bands=['nm410' ,'nm440','nm470','nm510','nm550','nm583','nm620','nm670','CLEAR','NIR']    
     #items= ['LEDA','LEDB','LEDC','LEDD','LEDE','LEDF','LEDG','LASER650']
@@ -1862,11 +1880,8 @@ def csvData(M):
     #   for band in bands:
     #       row=row+[sysData[M]['biofilm'][item][band]]
 
-
-
     filename = sysData[M]['Experiment']['startTime'] + '_' + M + '_data' + '.csv'
     filename=filename.replace(":","_")
-
     lock.acquire() #We are avoiding writing to a file at the same time as we do digital communications, since it might potentially cause the computer to lag and consequently data transfer to fail.
     if os.path.isfile(filename) is False: #Only if we are starting a fresh file
         if (len(row) == len(fieldnames)):  #AND the fieldnames match up with what is being written.
@@ -2302,8 +2317,49 @@ def runExperiment(M,placeholder):
     else: 
         turnEverythingOff(M)
         addTerminal(M,'Experiment Stopped')
-   
 
+@application.route("/RecordSample/<label>/<number>/<volume>", methods=['POST'])
+def RecordSample(label, number, volume):
+    sample_data = sysData[sysItems['UIDevice']]['samples']
+    if (sample_data['current_label'] != "") and (sysData[sysItems['UIDevice']]['Experiment']['ON']):        
+        
+        now=datetime.now()
+        elapsedTime=now-sysData[sysItems['UIDevice']]['Experiment']['startTimeRaw']
+        elapsedTimeSeconds=round(elapsedTime.total_seconds(),2)
+        
+        sample_data['record'].append([elapsedTimeSeconds, label, number, volume])
+        sample_data['label_history'][label] += 1
+        sample_data['current_number'] += 1
+
+        addTerminal(sysItems['UIDevice'], 'Sample Recorded: [' + label + ' (' + number + ') ' + volume + 'mL]')
+    elif (sample_data['current_label'] == ""):
+        addTerminal(sysItems['UIDevice'], 'Set a label before recording a sample')
+    else:
+        addTerminal(sysItems['UIDevice'], 'Experiment needs to be running to record a sample')
+    return ('', 204)
+
+@application.route("/SetLabel/<label>", methods=['POST'])
+def SetLabel(label):
+    sample_data = sysData[sysItems['UIDevice']]['samples']
+    if label in sample_data['label_history']:
+        sample_data['current_label'] = label
+    else:
+        sample_data['current_label'] = label
+        sample_data['label_history'][label] = 1
+    
+    sample_data['current_number'] = sample_data['label_history'][label]
+    return ('', 204)
+
+@application.route("/InoculationRecorded",methods=['POST'])
+def InoculationRecorded():
+    
+    incoluation_data = sysData[sysItems['UIDevice']]['Inoculation']
+    incoluation_data['ON'] = 1
+    
+    now = datetime.now()
+    incoluation_data['startTime'] = now.strftime("%Y-%m-%d %H:%M:%S")
+    
+    return ('', 204)
 
 
 if __name__ == '__main__':
