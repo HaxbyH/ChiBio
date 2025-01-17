@@ -103,26 +103,54 @@
           </div>
           
           <br>
-          
-          <h3>Experiment</h3>
-          
-     
-          <button id="ExperimentRunningIndicator" class="btn btn-danger" disabled> &nbsp &nbsp &nbsp  &nbsp &nbsp &nbsp  &nbsp &nbsp &nbsp </button><br style="line-height: 40px" />
-     
-    <button id="ExperimentStart">Start</button>
-    <button id="ExperimentStop">Stop</button>
-    <button id="ExperimentReset">Reset</button><br style="line-height: 30px" />
+
+    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 2em; padding: 10px; border-radius: 5px;">
+        <div>
+            <h3>Experiment</h3>
+            <button id="ExperimentRunningIndicator" class="btn btn-danger" disabled> &nbsp &nbsp &nbsp  &nbsp &nbsp &nbsp  &nbsp &nbsp &nbsp </button><br style="line-height: 40px" />
+            <button id="ExperimentStart">Start</button>
+            <button id="ExperimentStop">Stop</button>
+            <button id="ExperimentReset">Reset</button>
+            <br>
+            Experiment Start Time: <br>
+            <div style="display: inline" id="StartTime">0</div>
+        </div>
+        <div>
+            <h3>Inoculation</h3>
+            <button id="InoculationRunningIndicator" class="btn btn-danger" disabled> &nbsp &nbsp &nbsp  &nbsp &nbsp &nbsp  &nbsp &nbsp &nbsp </button><br style="line-height: 40px" />
+            <button id="InoculationStart">Start</button>
+            <br>
+            Inoculation Start Time: <br>
+            <div style="display: inline" id="InoculationStartTime">0</div>
+        </div>
+    </div>
     
-    
-     
-      
-           Experiment Start Time: <br>
-    <div style="display: inline" id="StartTime">0</div>
-    
-    
-      
-      <br>
-      
+    <br>
+    <h3 style="text-align: center;">Record Sample</h3>
+    <div style="display: flex; justify-content: center;">
+        <div style="display: flex; justify-content: center; align-items: flex-start; gap: 2em; padding: 10px; border-radius: 5px;">
+            <div class="align-self-center">
+                Label: <br>
+                <div id="CurrentLabel">NA</div>
+            </div>
+            <div style="text-align: center;">
+                <label for="SampleNumberInput",style="display: block; margin-bottom: 3px;">Number</label><br>
+                <input id="SampleNumberInput" type="number" value="1" style="width: 6em;" readonly class="no-arrows" />
+            </div>
+            <div style="text-align: center;">
+                <label for="SampleVolumeInput",style="display: block; margin-bottom: 3px;">Volume (mL)</label><br>
+                <input id="SampleVolumeInput" type="text" size="8" value="0" style="width: 6em;" />
+            </div>
+            <button id="RecordSample" style="margin-top: 1.4em;">Record Sample</button>
+        </div>
+    </div>
+    <div style="text-align: center;">
+        <label for="SampleNameInput",style="display: block; margin-bottom: 3px;">Set Label</label><br>
+        <input id="SampleNameInput" type="text" size="8" value="Sample" style="width: 10em;" />
+        <button id="SetLabel">Set</button>
+    </div>
+    <br>
+
       <h3>OD Regulation</h3> 
        <div style="line-height:25%;">
         <br>
@@ -1480,56 +1508,108 @@ function TitleFailure() {
 
 
 <!-- Button Scripts go below-->
- <script>
+    <script>
         $(function() {
             $('#ExperimentStart').click(function(){
-              
-               $.ajax({
+                
+                $.ajax({
                 type:'POST',
                 url: '/Experiment/1/0',
-                 success:function(response){ 
-                     getSysData();
-                 }
+                    success:function(response){ 
+                        getSysData();
+                    }
             }); 
-       
             })
         });
     </script>
-    
-      <script>
-        $(function() {
-            $('#ExperimentStop').click(function(){
-             
-               $.ajax({
-                   type:'POST',
-                url: '/Experiment/0/0',
-                 success:function(response){ 
-                     getSysData();
-                 }
-             }); 
-             })
+        
+    <script>
+    $(function() {
+        $('#ExperimentStop').click(function(){
+            
+            $.ajax({
+                type:'POST',
+            url: '/Experiment/0/0',
+                success:function(response){ 
+                    getSysData();
+                }
+            }); 
+            })
         });
     </script>
-    
-     <script>
+                                                        
+    <script>
         $(function() {
             $('#ExperimentReset').click(function(){
-             
-               $.ajax({
-                   type:'POST',
-                url: '/ExperimentReset',
-                 success:function(response){ 
-                     getSysData();
-                 }
-             }); 
-             })
+                $.ajax({
+                    type:'POST',
+                    url: '/ExperimentReset',
+                    success:function(response){ 
+                        getSysData();
+                    }
+                }); 
+            })
+        });
+    </script>
+
+    <script>
+        $(function() {
+            $('#InoculationStart').click(function(){
+                $.ajax({
+                    type:'POST',
+                    url: '/InoculationRecorded',
+                    success:function(response){
+                        getSysData();
+                    }
+                });
+            })
+        });
+    </script>
+
+    <script>
+        // Utility function for debouncing
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
+        $(function() {
+            const handleClick = debounce(function() {
+                let sample_name = document.getElementById("SampleNameInput").value;
+                let sample_number = document.getElementById("SampleNumberInput").value;
+                let sample_volume = document.getElementById("SampleVolumeInput").value;
+                
+                $.ajax({
+                    type: 'POST',
+                    url: '/RecordSample/' + sample_name + '/' + sample_number + '/' + sample_volume,
+                });
+            }, 600); // Debounce delay in milliseconds (e.g., 300ms)
+
+            $('#RecordSample').click(handleClick);
         });
     </script>
     
-    
-    
-    
-    
+    <script>
+        $(function() {
+            $('#SetLabel').click(function(){
+                
+                var label = document.getElementById("SampleNameInput").value;
+
+                $.ajax({
+                    type:'POST',
+                    url: '/SetLabel/' + label,
+                    success:function(response){ 
+                    getSysData();
+                    }
+                })
+            })
+        })
+    </script>
+                                                        
     <script>
         $(function() {
             $('#ODRegulate').click(function(){
