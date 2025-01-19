@@ -353,6 +353,14 @@ def initialise(M):
     sysData[M]['Thermostat']['record']=[]
 	
     sysData[M]['GrowthRate']['record']=[]
+    
+    sysData[M]['samples']['current_label']="NA"
+    sysData[M]['samples']['current_number']=1
+    sysData[M]['samples']['label_history']={}
+    sysData[M]['samples']['record']=[]
+    
+    sysData[M]['Inoculation']['startTime']='Waiting'
+    sysData[M]['Inoculation']['ON']=0
 
     sysDevices[M]['ThermometerInternal']['device']=I2C.get_i2c_device(0x18,2) #Get Thermometer on Bus 2!!!
     sysDevices[M]['ThermometerExternal']['device']=I2C.get_i2c_device(0x1b,2) #Get Thermometer on Bus 2!!!
@@ -1863,9 +1871,9 @@ def csvData(M):
     
     for sample in reversed(sysData[M]['samples']['record']):
         if 0 < sysData[M]['time']['record'][-1] - sample[0] < 60:
-            sample_names.append(sample[1])
-            sample_number.append(sample[2])
-            sample_volume.append(sample[3])
+            sample_names.append(sample[1].replace(',', ''))
+            sample_number.append(str(sample[2]).replace(',', ''))
+            sample_volume.append(str(sample[3]).replace(',', ''))
         else:
             break
         
@@ -2318,20 +2326,21 @@ def runExperiment(M,placeholder):
         turnEverythingOff(M)
         addTerminal(M,'Experiment Stopped')
 
-@application.route("/RecordSample/<label>/<number>/<volume>", methods=['POST'])
-def RecordSample(label, number, volume):
+@application.route("/RecordSample/<label>/<volume>", methods=['POST'])
+def RecordSample(label, volume):
     sample_data = sysData[sysItems['UIDevice']]['samples']
     if (sample_data['current_label'] != "") and (sysData[sysItems['UIDevice']]['Experiment']['ON']):        
-        
         now=datetime.now()
+        time.sleep(0.5)
         elapsedTime=now-sysData[sysItems['UIDevice']]['Experiment']['startTimeRaw']
         elapsedTimeSeconds=round(elapsedTime.total_seconds(),2)
         
-        sample_data['record'].append([elapsedTimeSeconds, label, number, volume])
+        sample_data['record'].append([elapsedTimeSeconds, label, sample_data['current_number'], volume])
         sample_data['label_history'][label] += 1
+
+        addTerminal(sysItems['UIDevice'], 'Sample Recorded: [' + label + ' (' + str(sample_data['current_number']) + ') ' + volume + 'mL]')
         sample_data['current_number'] += 1
 
-        addTerminal(sysItems['UIDevice'], 'Sample Recorded: [' + label + ' (' + number + ') ' + volume + 'mL]')
     elif (sample_data['current_label'] == ""):
         addTerminal(sysItems['UIDevice'], 'Set a label before recording a sample')
     else:
@@ -2358,7 +2367,7 @@ def InoculationRecorded():
     
     now = datetime.now()
     incoluation_data['startTime'] = now.strftime("%Y-%m-%d %H:%M:%S")
-    
+    addTerminal(sysItems['UIDevice'], 'Inoculation Recorded')
     return ('', 204)
 
 
