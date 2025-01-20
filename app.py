@@ -2329,7 +2329,7 @@ def runExperiment(M,placeholder):
 @application.route("/RecordSample/<label>/<volume>", methods=['POST'])
 def RecordSample(label, volume):
     sample_data = sysData[sysItems['UIDevice']]['samples']
-    if (sample_data['current_label'] != "") and (sysData[sysItems['UIDevice']]['Experiment']['ON']):        
+    if (sample_data['current_label'] != "NA") and (sysData[sysItems['UIDevice']]['Experiment']['ON']):        
         now=datetime.now()
         time.sleep(0.5)
         elapsedTime=now-sysData[sysItems['UIDevice']]['Experiment']['startTimeRaw']
@@ -2341,7 +2341,7 @@ def RecordSample(label, volume):
         addTerminal(sysItems['UIDevice'], 'Sample Recorded: [' + label + ' (' + str(sample_data['current_number']) + ') ' + volume + 'mL]')
         sample_data['current_number'] += 1
 
-    elif (sample_data['current_label'] == ""):
+    elif (sample_data['current_label'] == "NA"):
         addTerminal(sysItems['UIDevice'], 'Set a label before recording a sample')
     else:
         addTerminal(sysItems['UIDevice'], 'Experiment needs to be running to record a sample')

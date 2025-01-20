@@ -1579,8 +1579,7 @@ function TitleFailure() {
 
         $(function() {
             const handleClick = debounce(function() {
-                let sample_name = document.getElementById("SampleNameInput").value;
-                let sample_number = document.getElementById("SampleNumberInput").value;
+                let sample_name = document.getElementById("CurrentLabel").innerText;
                 let sample_volume = document.getElementById("SampleVolumeInput").value;
                 
                 $.ajax({
