@@ -1877,9 +1877,9 @@ def csvData(M):
     sysData[M]['samples']['current_cache'] = []
     
     row=row+[sysData[M]['Inoculation']['ON']]  
-    row=row+[','.join(sample_names)]
-    row=row+[',' .join(sample_number)]
-    row=row+[','.join(sample_volume)] 
+    row=row+[':'.join(sample_names)]
+    row=row+[':' .join(sample_number)]
+    row=row+[':'.join(sample_volume)] 
 	#Following can be uncommented if you are recording ALL spectra for e.g. biofilm experiments
     #bands=['nm410' ,'nm440','nm470','nm510','nm550','nm583','nm620','nm670','CLEAR','NIR']    
     #items= ['LEDA','LEDB','LEDC','LEDD','LEDE','LEDF','LEDG','LASER650']
