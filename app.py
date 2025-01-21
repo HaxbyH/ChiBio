@@ -83,7 +83,7 @@ sysData = {'M0' : {
                 'LEDF' : {'nm410' : 0, 'nm440' : 0, 'nm470' : 0, 'nm510' : 0, 'nm550' : 0, 'nm583' : 0, 'nm620' : 0, 'nm670' : 0,'CLEAR' : 0,'NIR' : 0},
                 'LEDG' : {'nm410' : 0, 'nm440' : 0, 'nm470' : 0, 'nm510' : 0, 'nm550' : 0, 'nm583' : 0, 'nm620' : 0, 'nm670' : 0,'CLEAR' : 0,'NIR' : 0},
                 'LASER650' : {'nm410' : 0, 'nm440' : 0, 'nm470' : 0, 'nm510' : 0, 'nm550' : 0, 'nm583' : 0, 'nm620' : 0, 'nm670' : 0,'CLEAR' : 0,'NIR' : 0}},
-   'samples' : {'current_label': "", 'current_number': 1 ,'label_history': {}, 'record': []},
+   'samples' : {'current_label': "", 'current_number': 1 ,'current_cache':[],'label_history': {}, 'record': []},
    }}
 
 
@@ -356,6 +356,7 @@ def initialise(M):
     
     sysData[M]['samples']['current_label']="NA"
     sysData[M]['samples']['current_number']=1
+    sysData[M]['samples']['current_cache']=[]
     sysData[M]['samples']['label_history']={}
     sysData[M]['samples']['record']=[]
     
@@ -1828,8 +1829,8 @@ def csvData(M):
                   'LED_6500K_setpoint', 'LED_600_setpoint', 'LED_550_setpoint', 'LED_white_setpoint',
                   'laser_setpoint','LED_UV_int','FP1_base','FP1_emit1','FP1_emit2','FP2_base',
                   'FP2_emit1','FP2_emit2','FP3_base','FP3_emit1','FP3_emit2','custom_prog_param1','custom_prog_param2',
-                  'custom_prog_param3','custom_prog_status','zigzag_target','growth_rate','sample_name',
-                  'sample_number','sample_volume', 'innoculated']
+                  'custom_prog_param3','custom_prog_status','zigzag_target','growth_rate','innoculated','sample_name',
+                  'sample_number','sample_volume']
     
     row=[sysData[M]['time']['record'][-1], #exp_time
         sysData[M]['OD']['record'][-1], #od_measured
@@ -1869,18 +1870,16 @@ def csvData(M):
     sample_number = []
     sample_volume = []
     
-    for sample in reversed(sysData[M]['samples']['record']):
-        if 0 < sysData[M]['time']['record'][-1] - sample[0] < 60:
-            sample_names.append(sample[1].replace(',', ''))
-            sample_number.append(str(sample[2]).replace(',', ''))
-            sample_volume.append(str(sample[3]).replace(',', ''))
-        else:
-            break
-        
+    for sample in reversed(sysData[M]['samples']['current_cache']):
+        sample_names.append(sample[1].replace(',', ''))
+        sample_number.append(str(sample[2]).replace(',', ''))
+        sample_volume.append(str(sample[3]).replace(',', ''))
+    sysData[M]['samples']['current_cache'] = []
+    
+    row=row+[sysData[M]['Inoculation']['ON']]  
     row=row+[','.join(sample_names)]
     row=row+[',' .join(sample_number)]
-    row=row+[','.join(sample_volume)]
-    row=row+[sysData[M]['Inoculation']['ON']]    
+    row=row+[','.join(sample_volume)] 
 	#Following can be uncommented if you are recording ALL spectra for e.g. biofilm experiments
     #bands=['nm410' ,'nm440','nm470','nm510','nm550','nm583','nm620','nm670','CLEAR','NIR']    
     #items= ['LEDA','LEDB','LEDC','LEDD','LEDE','LEDF','LEDG','LASER650']
@@ -2336,6 +2335,7 @@ def RecordSample(label, volume):
         elapsedTimeSeconds=round(elapsedTime.total_seconds(),2)
         
         sample_data['record'].append([elapsedTimeSeconds, label, sample_data['current_number'], volume])
+        sample_data['current_cache'].append([elapsedTimeSeconds, label, sample_data['current_number'], volume])
         sample_data['label_history'][label] += 1
 
         addTerminal(sysItems['UIDevice'], 'Sample Recorded: [' + label + ' (' + str(sample_data['current_number']) + ') ' + volume + 'mL]')
