@@ -49,7 +49,7 @@ sysData = {'M0' : {
    'UV' : {'WL' : 'UV', 'default': 0.5, 'target' : 0.0, 'max': 1.0, 'min' : 0.0,'ON' : 0},
    'Heat' : {'default': 0.0, 'target' : 0.0, 'max': 1.0, 'min' : 0.0,'ON' : 0,'record' : []},
    'Thermostat' : {'default': 37.0, 'target' : 0.0, 'max': 50.0, 'min' : 0.0,'ON' : 0,'record' : [],'cycleTime' : 30.0, 'Integral' : 0.0,'last' : -1},
-   'Experiment' : {'indicator' : 'USR0', 'startTime' : 'Waiting', 'startTimeRaw' : 0, 'ON' : 0,'cycles' : 0, 'cycleTime' : 60.0,'threadCount' : 0},
+   'Experiment' : {'indicator' : 'USR0', 'startTime' : 'Waiting', 'startTimeRaw' : 0, 'ON' : 0,'cycles' : 0, 'cycleTime' : 60.0,'threadCount' : 0, 'prefix': ""},
    'Inoculation' : {'startTime': 'Waiting', 'ON': 0},
    'Terminal' : {'text' : ''},
    'AS7341' : {
@@ -1877,9 +1877,9 @@ def csvData(M):
     sysData[M]['samples']['current_cache'] = []
     
     row=row+[sysData[M]['Inoculation']['ON']]  
-    row=row+[':'.join(sample_names)]
-    row=row+[':' .join(sample_number)]
-    row=row+[':'.join(sample_volume)] 
+    row=row+[' '.join(sample_names)]
+    row=row+[' ' .join(sample_number)]
+    row=row+[' '.join(sample_volume)] 
 	#Following can be uncommented if you are recording ALL spectra for e.g. biofilm experiments
     #bands=['nm410' ,'nm440','nm470','nm510','nm550','nm583','nm620','nm670','CLEAR','NIR']    
     #items= ['LEDA','LEDB','LEDC','LEDD','LEDE','LEDF','LEDG','LASER650']
@@ -1887,7 +1887,7 @@ def csvData(M):
     #   for band in bands:
     #       row=row+[sysData[M]['biofilm'][item][band]]
 
-    filename = sysData[M]['Experiment']['startTime'] + '_' + M + '_data' + '.csv'
+    filename = sysData[M]['Experiment']['prefix'] + ' ' + sysData[M]['Experiment']['startTime'] + '_' + M + '_data' + '.csv'
     filename=filename.replace(":","_")
     lock.acquire() #We are avoiding writing to a file at the same time as we do digital communications, since it might potentially cause the computer to lag and consequently data transfer to fail.
     if os.path.isfile(filename) is False: #Only if we are starting a fresh file
@@ -2290,7 +2290,7 @@ def runExperiment(M,placeholder):
         TempStartTime=sysData[M]['Experiment']['startTimeRaw']
         sysData[M]['Experiment']['startTimeRaw']=0 #We had to set this to zero during the write operation since the system does not like writing data in such a format.
         
-        filename = sysData[M]['Experiment']['startTime'] + '_' + M + '.txt'
+        filename = sysData[M]['Experiment']['prefix'] + " " + sysData[M]['Experiment']['startTime'] + '_' + M + '.txt'
         filename=filename.replace(":","_")
         f = open(filename,'w')
         simplejson.dump(sysData[M],f)
@@ -2370,6 +2370,12 @@ def InoculationRecorded():
     addTerminal(sysItems['UIDevice'], 'Inoculation Recorded')
     return ('', 204)
 
+@application.route("/SetPrefix/<prefix>", methods=['POST'])
+def SetPrefix(prefix):
+    
+    sysData[sysItems['UIDevice']]['Experiment']['prefix'] = prefix
+    
+    return ('', 204)
 
 if __name__ == '__main__':
     initialiseAll()

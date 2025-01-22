@@ -34,27 +34,40 @@
 
 <script> setInterval(getSysData,2000)</script>
 
-
-
-	
-	<div id="titlesection"> <!-- We put this whole section inside a div so that if we have no internet connection (and the image fails to load) the TitleFailure function replaces the title. --> 
-	<div class="row">
-    <div class="col">
-      
-    </div>
-    <div class="col-md-auto">
-      <a href="https://chi.bio" target="_blank"><img  src="http://chi.bio/CBL.png" height="60px" style="padding-top: 5px;" onerror="TitleFailure()"></a>
-    </div>
-    <div class="col">
-      <iframe src="https://chi.bio/news.html" seamless height="60px" width="100%" frameborder="0" marginheight="0" style="padding-top:15px;"></iframe>
-	  
-    </div>
+<div id="titlesection"> <!-- We put this whole section inside a div so that if we have no internet connection (and the image fails to load) the TitleFailure function replaces the title. --> 
+    <div class="row">
+        <div class="col">
+            <!-- Placeholder content -->
+            <div style="padding-top: 5px;">
+                <p>Output File: <span id="dynamicOutputFile"> Waiting </span></p>
+                <p>Set File Prefix: <input type="text" id="prefixInput" style="width: 130px;" /> <button id="setPrefixButton">Set Prefix</button></p>
+            </div>
+        </div>
+        <div class="col-md-auto">
+            <a href="https://chi.bio" target="_blank"><img src="http://chi.bio/CBL.png" height="60px" style="padding-top: 5px;" onerror="TitleFailure()"></a>
+        </div>
+        <div class="col">
+            <iframe src="https://chi.bio/news.html" seamless height="60px" width="100%" frameborder="0" marginheight="0" style="padding-top:15px;"></iframe>
+        </div>
 	</div>
 	</div>
 	
 <hr>
 
-
+<script>
+    $(function() {
+        $('#setPrefixButton').click(function(){
+            let prefix = document.getElementById('prefixInput').value;
+            $.ajax({
+                type:'POST',
+                url: '/SetPrefix/' + prefix,
+                success:function(response){ 
+                getSysData();
+                }
+            }); 
+        })
+    });
+</script>
 
 
 
