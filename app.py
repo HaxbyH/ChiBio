@@ -49,7 +49,7 @@ sysData = {'M0' : {
    'UV' : {'WL' : 'UV', 'default': 0.5, 'target' : 0.0, 'max': 1.0, 'min' : 0.0,'ON' : 0},
    'Heat' : {'default': 0.0, 'target' : 0.0, 'max': 1.0, 'min' : 0.0,'ON' : 0,'record' : []},
    'Thermostat' : {'default': 37.0, 'target' : 0.0, 'max': 50.0, 'min' : 0.0,'ON' : 0,'record' : [],'cycleTime' : 30.0, 'Integral' : 0.0,'last' : -1},
-   'Experiment' : {'indicator' : 'USR0', 'startTime' : 'Waiting', 'startTimeRaw' : 0, 'ON' : 0,'cycles' : 0, 'cycleTime' : 60.0,'threadCount' : 0, 'prefix': ""},
+   'Experiment' : {'indicator' : 'USR0', 'startTime' : ' Waiting ', 'startTimeRaw' : 0, 'ON' : 0,'cycles' : 0, 'cycleTime' : 60.0,'threadCount' : 0, 'prefix': ""},
    'Inoculation' : {'startTime': 'Waiting', 'ON': 0},
    'Terminal' : {'text' : ''},
    'AS7341' : {
@@ -361,7 +361,7 @@ def initialise(M):
     sysData[M]['samples']['label_history']={}
     sysData[M]['samples']['record']=[]
     
-    sysData[M]['Inoculation']['startTime']='Waiting'
+    sysData[M]['Inoculation']['startTime']=' Waiting '
     sysData[M]['Inoculation']['ON']=0
 
     sysDevices[M]['ThermometerInternal']['device']=I2C.get_i2c_device(0x18,2) #Get Thermometer on Bus 2!!!
