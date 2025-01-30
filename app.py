@@ -315,6 +315,7 @@ def initialise(M):
     sysData[M]['Experiment']['threadCount']=0
     sysData[M]['Experiment']['startTime']=' Waiting '
     sysData[M]['Experiment']['startTimeRaw']=0
+    sysData[M]['Experiment']['prefix']=''
     sysData[M]['OD']['ON']=0
     sysData[M]['OD']['Measuring']=0
     sysData[M]['OD']['Integral']=0.0
@@ -1830,7 +1831,7 @@ def csvData(M):
                   'laser_setpoint','LED_UV_int','FP1_base','FP1_emit1','FP1_emit2','FP2_base',
                   'FP2_emit1','FP2_emit2','FP3_base','FP3_emit1','FP3_emit2','custom_prog_param1','custom_prog_param2',
                   'custom_prog_param3','custom_prog_status','zigzag_target','growth_rate','innoculated','sample_name',
-                  'sample_number','sample_volume']
+                  'sample_volume']
     
     row=[sysData[M]['time']['record'][-1], #exp_time
         sysData[M]['OD']['record'][-1], #od_measured
@@ -1866,19 +1867,17 @@ def csvData(M):
     row=row+[sysData[M]['Zigzag']['target']*float(sysData[M]['Zigzag']['ON'])]
     row=row+[sysData[M]['GrowthRate']['current']*sysData[M]['Zigzag']['ON']]
     
-    sample_names = []
-    sample_number = []
     sample_volume = []
+    sample_names = []
     
     for sample in reversed(sysData[M]['samples']['current_cache']):
-        sample_names.append(sample[1].replace(',', ''))
-        sample_number.append(str(sample[2]).replace(',', ''))
+        sample_name = sample[1].replace(',', '') + str(sample[2]).replace(',', '')
+        sample_names.append(sample_name)
         sample_volume.append(str(sample[3]).replace(',', ''))
     sysData[M]['samples']['current_cache'] = []
     
     row=row+[sysData[M]['Inoculation']['ON']]  
     row=row+[' '.join(sample_names)]
-    row=row+[' ' .join(sample_number)]
     row=row+[' '.join(sample_volume)] 
 	#Following can be uncommented if you are recording ALL spectra for e.g. biofilm experiments
     #bands=['nm410' ,'nm440','nm470','nm510','nm550','nm583','nm620','nm670','CLEAR','NIR']    
