@@ -140,27 +140,36 @@
     
     <br>
     <h3 style="text-align: center;">Record Sample</h3>
-    <div style="display: flex; justify-content: center;">
-        <div style="display: flex; justify-content: center; align-items: flex-start; gap: 2em; padding: 10px; border-radius: 5px;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 1.5em; padding: 8px; border-radius: 5px;">
+        <div style="text-align: center;">
             <div class="align-self-center">
-                Label: <br>
+                <strong>Label:</strong><br>
                 <div id="CurrentLabel">NA</div>
             </div>
-            <div style="text-align: center;">
-                <label for="SampleNumberInput",style="display: block; margin-bottom: 3px;">Number</label><br>
-                <input id="SampleNumberInput" type="number" value="1" style="width: 6em;" readonly class="no-arrows" />
-            </div>
-            <div style="text-align: center;">
-                <label for="SampleVolumeInput",style="display: block; margin-bottom: 3px;">Volume (mL)</label><br>
-                <input id="SampleVolumeInput" type="text" size="8" value="0" style="width: 6em;" />
-            </div>
-            <button id="RecordSample" style="margin-top: 1.4em;">Record Sample</button>
+        </div>
+        <div style="text-align: center;">
+            <label for="SampleNumberInput" style="display: block; margin-bottom: 2px;">Number</label><br>
+            <input id="SampleNumberInput" type="number" value="1" style="width: 6em;" readonly class="no-arrows" />
+        </div>
+        <div style="text-align: center;">
+            <label for="SampleVolumeInput" style="display: block; margin-bottom: 2px;">Volume (mL)</label><br>
+            <input id="SampleVolumeInput" type="text" size="8" value="0" style="width: 6em;" />
+        </div>
+        <div style="text-align: center;">
+            <button id="RecordSample" style="margin-top: 1em;">Record Sample</button>
         </div>
     </div>
-    <div style="text-align: center;">
-        <label for="SampleNameInput",style="display: block; margin-bottom: 3px;">Set Label</label><br>
-        <input id="SampleNameInput" type="text" size="8" value="Sample" style="width: 10em;" />
-        <button id="SetLabel">Set</button>
+    
+    <!-- Increase space between the two sections by adding a margin-top -->
+    <div style="display: flex; justify-content: center; align-items: center; gap: 3em; margin-top: 1px;">
+        <div style="text-align: center;">
+            <label for="SampleNameInput" style="display: block; margin-bottom: 2px;">Set Label</label><br>
+            <input id="SampleNameInput" type="text" size="8" value="Sample" style="width: 10em;" />
+            <button id="SetLabel" style="margin-top: 1px;">Set</button>
+        </div>
+        <div style="text-align: center;">
+            <button id="DisplayLogs" style="margin-top: 15px; width: 100%;">Display Sample Logs</button>
+        </div>
     </div>
     <br>
 
@@ -1620,6 +1629,21 @@ function TitleFailure() {
                 })
             })
         })
+    </script>
+
+    <script>
+        $(function() {
+            $('#DisplayLogs').click(function() {
+                var targetURL = '/DisplayLogs';
+                $.ajax({
+                    type: 'POST',
+                    url: targetURL,
+                    success: function(response) {
+                        getSysData();
+                    }
+                });
+            });
+        });
     </script>
                                                         
     <script>

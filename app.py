@@ -2333,7 +2333,7 @@ def RecordSample(label, volume):
         elapsedTime=now-sysData[sysItems['UIDevice']]['Experiment']['startTimeRaw']
         elapsedTimeSeconds=round(elapsedTime.total_seconds(),2)
         
-        sample_data['record'].append([elapsedTimeSeconds, label, sample_data['current_number'], volume])
+        sample_data['record'].append([elapsedTimeSeconds, label, sample_data['current_number'], volume, now.strftime("%Y-%m-%d %H:%M:%S ")])
         sample_data['current_cache'].append([elapsedTimeSeconds, label, sample_data['current_number'], volume])
         sample_data['label_history'][label] += 1
 
@@ -2374,6 +2374,18 @@ def SetPrefix(prefix):
     
     sysData[sysItems['UIDevice']]['Experiment']['prefix'] = prefix
     
+    return ('', 204)
+
+@application.route("/DisplayLogs", methods=['POST'])
+def DisplayLogs():
+    sample_data = sysData[sysItems['UIDevice']]['samples']['record']
+    text_out = 'Display Sample Logs</br>'
+    text_out = text_out + '-------------------------------------------------------</br>'
+    for s in sample_data:
+        sample_record = s[1] + ' (' + str(s[2]) + ') ' + str(s[3]) + 'mL - ' + s[4] + '</br>'
+        text_out = text_out + sample_record
+    text_out = text_out + '-------------------------------------------------------'
+    addTerminal(sysItems['UIDevice'], text_out)
     return ('', 204)
 
 if __name__ == '__main__':
