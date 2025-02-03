@@ -2381,7 +2381,7 @@ def DisplayLogs():
     sample_data = sysData[sysItems['UIDevice']]['samples']['record']
     text_out = 'Display Sample Logs</br>'
     text_out = text_out + '-------------------------------------------------------</br>'
-    for s in sample_data:
+    for s in reversed(sample_data):
         sample_record = s[1] + ' (' + str(s[2]) + ') ' + str(s[3]) + 'mL - ' + s[4] + '</br>'
         text_out = text_out + sample_record
     text_out = text_out + '-------------------------------------------------------'
