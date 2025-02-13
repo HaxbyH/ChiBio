@@ -34,27 +34,40 @@
 
 <script> setInterval(getSysData,2000)</script>
 
-
-
-	
-	<div id="titlesection"> <!-- We put this whole section inside a div so that if we have no internet connection (and the image fails to load) the TitleFailure function replaces the title. --> 
-	<div class="row">
-    <div class="col">
-      
-    </div>
-    <div class="col-md-auto">
-      <a href="https://chi.bio" target="_blank"><img  src="http://chi.bio/CBL.png" height="60px" style="padding-top: 5px;" onerror="TitleFailure()"></a>
-    </div>
-    <div class="col">
-      <iframe src="https://chi.bio/news.html" seamless height="60px" width="100%" frameborder="0" marginheight="0" style="padding-top:15px;"></iframe>
-	  
-    </div>
+<div id="titlesection"> <!-- We put this whole section inside a div so that if we have no internet connection (and the image fails to load) the TitleFailure function replaces the title. --> 
+    <div class="row">
+        <div class="col">
+            <!-- Placeholder content -->
+            <div style="padding-top: 5px;">
+                <p>Output File: <span id="dynamicOutputFile"> Waiting </span></p>
+                <p>Set File Prefix: <input type="text" id="prefixInput" style="width: 130px;" /> <button id="setPrefixButton">Set Prefix</button></p>
+            </div>
+        </div>
+        <div class="col-md-auto">
+            <a href="https://chi.bio" target="_blank"><img src="http://chi.bio/CBL.png" height="60px" style="padding-top: 5px;" onerror="TitleFailure()"></a>
+        </div>
+        <div class="col">
+            <iframe src="https://chi.bio/news.html" seamless height="60px" width="100%" frameborder="0" marginheight="0" style="padding-top:15px;"></iframe>
+        </div>
 	</div>
 	</div>
 	
 <hr>
 
-
+<script>
+    $(function() {
+        $('#setPrefixButton').click(function(){
+            let prefix = document.getElementById('prefixInput').value;
+            $.ajax({
+                type:'POST',
+                url: '/SetPrefix/' + prefix,
+                success:function(response){ 
+                getSysData();
+                }
+            }); 
+        })
+    });
+</script>
 
 
 
@@ -127,27 +140,36 @@
     
     <br>
     <h3 style="text-align: center;">Record Sample</h3>
-    <div style="display: flex; justify-content: center;">
-        <div style="display: flex; justify-content: center; align-items: flex-start; gap: 2em; padding: 10px; border-radius: 5px;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 1.5em; padding: 8px; border-radius: 5px;">
+        <div style="text-align: center;">
             <div class="align-self-center">
-                Label: <br>
+                <strong>Label:</strong><br>
                 <div id="CurrentLabel">NA</div>
             </div>
-            <div style="text-align: center;">
-                <label for="SampleNumberInput",style="display: block; margin-bottom: 3px;">Number</label><br>
-                <input id="SampleNumberInput" type="number" value="1" style="width: 6em;" readonly class="no-arrows" />
-            </div>
-            <div style="text-align: center;">
-                <label for="SampleVolumeInput",style="display: block; margin-bottom: 3px;">Volume (mL)</label><br>
-                <input id="SampleVolumeInput" type="text" size="8" value="0" style="width: 6em;" />
-            </div>
-            <button id="RecordSample" style="margin-top: 1.4em;">Record Sample</button>
+        </div>
+        <div style="text-align: center; line-height:25%;">
+            <label for="SampleNumberInput" style="display: block; margin-bottom: 2px;">Number</label><br>
+            <input id="SampleNumberInput" type="number" value="1" style="width: 6em;" readonly class="no-arrows" />
+        </div>
+        <div style="text-align: center; line-height:25%;">
+            <label for="SampleVolumeInput" style="display: block; margin-bottom: 2px;">Volume (mL)</label><br>
+            <input id="SampleVolumeInput" type="text" size="8" value="0" style="width: 6em;" />
+        </div>
+        <div style="text-align: center;">
+            <button id="RecordSample" style="margin-top: 1em;">Record Sample</button>
         </div>
     </div>
-    <div style="text-align: center;">
-        <label for="SampleNameInput",style="display: block; margin-bottom: 3px;">Set Label</label><br>
-        <input id="SampleNameInput" type="text" size="8" value="Sample" style="width: 10em;" />
-        <button id="SetLabel">Set</button>
+    
+    <!-- Increase space between the two sections by adding a margin-top -->
+    <div style="display: flex; justify-content: center; align-items: center; gap: 3em; margin-top: 1px;">
+        <div style="text-align: center;">
+            <label for="SampleNameInput" style="display: block; margin-bottom: -20px;line-height:25%;">Set Label</label><br>
+            <input id="SampleNameInput" type="text" size="8" value="Sample" style="width: 10em;line-height:25%;" />
+            <button id="SetLabel" style="margin-top: 1px;">Set</button>
+        </div>
+        <div style="text-align: center;">
+            <button id="DisplayLogs" style="margin-top: 10px; width: 100%;">Display Sample Logs</button>
+        </div>
     </div>
     <br>
 
@@ -1607,6 +1629,21 @@ function TitleFailure() {
                 })
             })
         })
+    </script>
+
+    <script>
+        $(function() {
+            $('#DisplayLogs').click(function() {
+                var targetURL = '/DisplayLogs';
+                $.ajax({
+                    type: 'POST',
+                    url: targetURL,
+                    success: function(response) {
+                        getSysData();
+                    }
+                });
+            });
+        });
     </script>
                                                         
     <script>

@@ -49,7 +49,7 @@ sysData = {'M0' : {
    'UV' : {'WL' : 'UV', 'default': 0.5, 'target' : 0.0, 'max': 1.0, 'min' : 0.0,'ON' : 0},
    'Heat' : {'default': 0.0, 'target' : 0.0, 'max': 1.0, 'min' : 0.0,'ON' : 0,'record' : []},
    'Thermostat' : {'default': 37.0, 'target' : 0.0, 'max': 50.0, 'min' : 0.0,'ON' : 0,'record' : [],'cycleTime' : 30.0, 'Integral' : 0.0,'last' : -1},
-   'Experiment' : {'indicator' : 'USR0', 'startTime' : 'Waiting', 'startTimeRaw' : 0, 'ON' : 0,'cycles' : 0, 'cycleTime' : 60.0,'threadCount' : 0},
+   'Experiment' : {'indicator' : 'USR0', 'startTime' : ' Waiting ', 'startTimeRaw' : 0, 'ON' : 0,'cycles' : 0, 'cycleTime' : 60.0,'threadCount' : 0, 'prefix': ""},
    'Inoculation' : {'startTime': 'Waiting', 'ON': 0},
    'Terminal' : {'text' : ''},
    'AS7341' : {
@@ -315,6 +315,7 @@ def initialise(M):
     sysData[M]['Experiment']['threadCount']=0
     sysData[M]['Experiment']['startTime']=' Waiting '
     sysData[M]['Experiment']['startTimeRaw']=0
+    sysData[M]['Experiment']['prefix']=''
     sysData[M]['OD']['ON']=0
     sysData[M]['OD']['Measuring']=0
     sysData[M]['OD']['Integral']=0.0
@@ -360,7 +361,7 @@ def initialise(M):
     sysData[M]['samples']['label_history']={}
     sysData[M]['samples']['record']=[]
     
-    sysData[M]['Inoculation']['startTime']='Waiting'
+    sysData[M]['Inoculation']['startTime']=' Waiting '
     sysData[M]['Inoculation']['ON']=0
 
     sysDevices[M]['ThermometerInternal']['device']=I2C.get_i2c_device(0x18,2) #Get Thermometer on Bus 2!!!
@@ -1830,7 +1831,7 @@ def csvData(M):
                   'laser_setpoint','LED_UV_int','FP1_base','FP1_emit1','FP1_emit2','FP2_base',
                   'FP2_emit1','FP2_emit2','FP3_base','FP3_emit1','FP3_emit2','custom_prog_param1','custom_prog_param2',
                   'custom_prog_param3','custom_prog_status','zigzag_target','growth_rate','innoculated','sample_name',
-                  'sample_number','sample_volume']
+                  'sample_volume']
     
     row=[sysData[M]['time']['record'][-1], #exp_time
         sysData[M]['OD']['record'][-1], #od_measured
@@ -1866,20 +1867,18 @@ def csvData(M):
     row=row+[sysData[M]['Zigzag']['target']*float(sysData[M]['Zigzag']['ON'])]
     row=row+[sysData[M]['GrowthRate']['current']*sysData[M]['Zigzag']['ON']]
     
-    sample_names = []
-    sample_number = []
     sample_volume = []
+    sample_names = []
     
     for sample in reversed(sysData[M]['samples']['current_cache']):
-        sample_names.append(sample[1].replace(',', ''))
-        sample_number.append(str(sample[2]).replace(',', ''))
+        sample_name = sample[1].replace(',', '') + str(sample[2]).replace(',', '')
+        sample_names.append(sample_name)
         sample_volume.append(str(sample[3]).replace(',', ''))
     sysData[M]['samples']['current_cache'] = []
     
     row=row+[sysData[M]['Inoculation']['ON']]  
-    row=row+[':'.join(sample_names)]
-    row=row+[':' .join(sample_number)]
-    row=row+[':'.join(sample_volume)] 
+    row=row+[' '.join(sample_names)]
+    row=row+[' '.join(sample_volume)] 
 	#Following can be uncommented if you are recording ALL spectra for e.g. biofilm experiments
     #bands=['nm410' ,'nm440','nm470','nm510','nm550','nm583','nm620','nm670','CLEAR','NIR']    
     #items= ['LEDA','LEDB','LEDC','LEDD','LEDE','LEDF','LEDG','LASER650']
@@ -1887,7 +1886,7 @@ def csvData(M):
     #   for band in bands:
     #       row=row+[sysData[M]['biofilm'][item][band]]
 
-    filename = sysData[M]['Experiment']['startTime'] + '_' + M + '_data' + '.csv'
+    filename = sysData[M]['Experiment']['prefix'] + ' ' + sysData[M]['Experiment']['startTime'] + '_' + M + '_data' + '.csv'
     filename=filename.replace(":","_")
     lock.acquire() #We are avoiding writing to a file at the same time as we do digital communications, since it might potentially cause the computer to lag and consequently data transfer to fail.
     if os.path.isfile(filename) is False: #Only if we are starting a fresh file
@@ -2290,7 +2289,7 @@ def runExperiment(M,placeholder):
         TempStartTime=sysData[M]['Experiment']['startTimeRaw']
         sysData[M]['Experiment']['startTimeRaw']=0 #We had to set this to zero during the write operation since the system does not like writing data in such a format.
         
-        filename = sysData[M]['Experiment']['startTime'] + '_' + M + '.txt'
+        filename = sysData[M]['Experiment']['prefix'] + " " + sysData[M]['Experiment']['startTime'] + '_' + M + '.txt'
         filename=filename.replace(":","_")
         f = open(filename,'w')
         simplejson.dump(sysData[M],f)
@@ -2334,7 +2333,7 @@ def RecordSample(label, volume):
         elapsedTime=now-sysData[sysItems['UIDevice']]['Experiment']['startTimeRaw']
         elapsedTimeSeconds=round(elapsedTime.total_seconds(),2)
         
-        sample_data['record'].append([elapsedTimeSeconds, label, sample_data['current_number'], volume])
+        sample_data['record'].append([elapsedTimeSeconds, label, sample_data['current_number'], volume, now.strftime("%Y-%m-%d %H:%M:%S ")])
         sample_data['current_cache'].append([elapsedTimeSeconds, label, sample_data['current_number'], volume])
         sample_data['label_history'][label] += 1
 
@@ -2370,6 +2369,24 @@ def InoculationRecorded():
     addTerminal(sysItems['UIDevice'], 'Inoculation Recorded')
     return ('', 204)
 
+@application.route("/SetPrefix/<prefix>", methods=['POST'])
+def SetPrefix(prefix):
+    
+    sysData[sysItems['UIDevice']]['Experiment']['prefix'] = prefix
+    
+    return ('', 204)
+
+@application.route("/DisplayLogs", methods=['POST'])
+def DisplayLogs():
+    sample_data = sysData[sysItems['UIDevice']]['samples']['record']
+    text_out = 'Display Sample Logs</br>'
+    text_out = text_out + '-------------------------------------------------------</br>'
+    for s in reversed(sample_data):
+        sample_record = s[1] + ' (' + str(s[2]) + ') ' + str(s[3]) + 'mL - ' + s[4] + '</br>'
+        text_out = text_out + sample_record
+    text_out = text_out + '-------------------------------------------------------'
+    addTerminal(sysItems['UIDevice'], text_out)
+    return ('', 204)
 
 if __name__ == '__main__':
     initialiseAll()

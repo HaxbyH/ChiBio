@@ -11,17 +11,22 @@ function getSysData(){
             }
  
              }); 
-      // console.log(document.getElementById("SampleVolumeInput").value);
  }
  
  var charts = [];
  
  
  function updateData(data){
-         
          var running = Boolean(data.Experiment.ON); //True if Experiment is running.
+
+         document.getElementById('dynamicOutputFile').innerHTML = data.Experiment.prefix + ' ' + data.Experiment.startTime;
+          console.log(data.Experiment.startTime)
+          if (data.Experiment.startTime === " Waiting ") {
+               document.getElementById('setPrefixButton').disabled = false; // Active if "Waiting"
+           } else {
+               document.getElementById('setPrefixButton').disabled = true;  // Disabled if not "Waiting"
+           }
          
-      //    document.getElementById('SampleNumberInput').value = 14;
          document.getElementById('CurrentLabel').innerHTML = data.samples.current_label;
          document.getElementById('SampleNumberInput').value = data.samples.current_number;
              
