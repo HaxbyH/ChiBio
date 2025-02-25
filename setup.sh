@@ -6,7 +6,7 @@ sed -i 's@1000@root@' /lib/systemd/system/cloud9.service
 sed -i 's@User=debian@User=root@' /lib/systemd/system/cloud9.service
 cd ..
 echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" >> resolv.conf
-sudo /sbin/route add default gw 192.168.7.1
+sudo /sbin/route add default gw 192.168.18.1
 sudo apt-get update
 mkdir ~/chibio
 cd ~/../home/debian
